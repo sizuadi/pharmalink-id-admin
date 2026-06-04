@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --primary: 175 71% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 174 41% 91%;
+    --secondary-foreground: 175 71% 22%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 33%;
+    --accent: 174 41% 91%;
+    --accent-foreground: 175 71% 22%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 30 85% 61%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 175 71% 35%;
+    --radius: 0.6rem;
+  }
+
+  .dark {
+    --background: 200 7% 9%;
+    --foreground: 210 17% 93%;
+    --card: 200 6% 12%;
+    --card-foreground: 210 17% 93%;
+    --primary: 175 64% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 6% 16%;
+    --secondary-foreground: 210 17% 93%;
+    --muted: 200 6% 16%;
+    --muted-foreground: 210 10% 65%;
+    --accent: 200 6% 18%;
+    --accent-foreground: 210 17% 93%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --warning: 30 85% 61%;
+    --border: 200 6% 20%;
+    --input: 200 6% 22%;
+    --ring: 175 64% 42%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}

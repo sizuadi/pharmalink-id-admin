@@ -1,0 +1,7 @@
+services:
+  admin:
+    image: sizuwanoadi/pharmalink-admin:latest
+    container_name: pharmalink-admin
+    restart: unless-stopped
+    ports:
+      - "5173:80"

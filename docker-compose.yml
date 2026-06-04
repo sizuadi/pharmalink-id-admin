@@ -1,12 +1,9 @@
 services:
   admin:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-https://api-pharmalink.sizu.dev/api/v1}
-    image: pharmalink-admin:latest
+    image: ${DOCKER_IMAGE:-sizuwanoadi/pharmalink-admin:latest}
     container_name: pharmalink-admin
-    ports:
-      - "5173:80"
     restart: unless-stopped
+    env_file:
+      - .env.docker
+    ports:
+      - "${ADMIN_PORT:-5173}:80"

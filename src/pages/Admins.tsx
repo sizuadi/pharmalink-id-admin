@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
-import { api, buildQuery, type Paginated, type Single, type ApiError } from "@/lib/api";
+import { api, buildQuery, type Paginated, type ApiError } from "@/lib/api";
 import type { AdminUser } from "@/lib/types";
 import { ROLE } from "@/lib/types";
 import { useAuth } from "@/contexts/AuthContext";

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Modal, DetailRow, Field } from "@/components/ui/modal";
 import { ActiveBadge } from "@/components/StatusBadge";
-import { formatDate, formatRupiah } from "@/lib/utils";
+import { formatRupiah } from "@/lib/utils";
 
 export function Pharmacies() {
   const [rows, setRows] = useState<Pharmacy[]>([]);

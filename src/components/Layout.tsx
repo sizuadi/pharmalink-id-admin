@@ -7,6 +7,8 @@ import {
   Users,
   Building2,
   Star,
+  FileText,
+  ShieldCheck,
   LogOut,
   Moon,
   Sun,
@@ -22,6 +24,8 @@ const navItems = [
   { to: "/patients", label: "Patients", icon: Users, end: false },
   { to: "/pharmacies", label: "Pharmacies", icon: Building2, end: false },
   { to: "/reviews", label: "Reviews", icon: Star, end: false },
+  { to: "/prescriptions", label: "Prescriptions", icon: FileText, end: false },
+  { to: "/admins", label: "Admins", icon: ShieldCheck, end: false },
 ];
 
 function useDarkMode() {

@@ -9,6 +9,7 @@ import {
   Star,
   FileText,
   ShieldCheck,
+  Settings as SettingsIcon,
   LogOut,
   Moon,
   Sun,
@@ -26,6 +27,7 @@ const navItems = [
   { to: "/reviews", label: "Reviews", icon: Star, end: false },
   { to: "/prescriptions", label: "Prescriptions", icon: FileText, end: false },
   { to: "/admins", label: "Admins", icon: ShieldCheck, end: false },
+  { to: "/settings", label: "Settings", icon: SettingsIcon, end: false },
 ];
 
 function useDarkMode() {

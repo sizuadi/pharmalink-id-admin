@@ -43,7 +43,8 @@ export function Admins() {
   async function toggleStatus(u: AdminUser) {
     setBusyId(u.id);
     try {
-      const nextStatus = u.status_id === 1 ? 0 : 1;
+      // Status IDs mirror prisma/seeds/status.seed.ts: 1 = Active, 2 = Inactive.
+      const nextStatus = u.status_id === 1 ? 2 : 1;
       await api.put(`/admin/admins/${u.id}/status`, { status_id: nextStatus });
       await load();
     } catch (err) {

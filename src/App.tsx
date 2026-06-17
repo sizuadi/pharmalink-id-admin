@@ -9,6 +9,7 @@ import { Pharmacies } from "@/pages/Pharmacies";
 import { Reviews } from "@/pages/Reviews";
 import { Prescriptions } from "@/pages/Prescriptions";
 import { Admins } from "@/pages/Admins";
+import { Notifications } from "@/pages/Notifications";
 import { Settings } from "@/pages/Settings";
 import { ROLE } from "@/lib/types";
 
@@ -44,6 +45,7 @@ function App() {
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/prescriptions" element={<Prescriptions />} />
           <Route path="/admins" element={<Admins />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>

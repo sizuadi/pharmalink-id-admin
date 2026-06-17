@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { api, buildQuery, type Paginated } from "@/lib/api";
+import { api, assetUrl, buildQuery, type Paginated } from "@/lib/api";
 import type { Prescription } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -144,9 +144,9 @@ export function Prescriptions() {
             </dl>
 
             {detail.image_url ? (
-              <a href={detail.image_url} target="_blank" rel="noreferrer">
+              <a href={assetUrl(detail.image_url)} target="_blank" rel="noreferrer">
                 <img
-                  src={detail.image_url}
+                  src={assetUrl(detail.image_url)}
                   alt="Resep"
                   className="max-h-[50vh] w-full rounded-md border border-border object-contain"
                 />

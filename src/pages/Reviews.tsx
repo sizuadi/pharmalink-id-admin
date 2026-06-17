@@ -4,6 +4,7 @@ import { api, buildQuery, type Paginated, type Single, type ApiError } from "@/l
 import type { Review } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
 
@@ -28,19 +29,29 @@ export function Reviews() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [ratingFilter, setRatingFilter] = useState("");
+  const [sort, setSort] = useState("created_at:desc");
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      // Review listAll sorts by sortName=field, sortBy=direction.
+      const [sortName, sortBy] = sort.split(":");
       const res = await api.get<Paginated<Review>>(
-        `/admin/reviews${buildQuery({ page, perPage: 10 })}`
+        `/admin/reviews${buildQuery({
+          page,
+          perPage: 10,
+          rating: ratingFilter,
+          sortName,
+          sortBy,
+        })}`
       );
       setRows(res.data ?? []);
       setTotalPages(res.meta?.totalPages ?? 1);
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, ratingFilter, sort]);
 
   useEffect(() => {
     load();
@@ -68,6 +79,27 @@ export function Reviews() {
 
       <Card>
         <CardContent className="pt-5">
+          <div className="mb-4 flex flex-wrap gap-2">
+            <Select
+              value={ratingFilter}
+              onChange={(e) => { setPage(1); setRatingFilter(e.target.value); }}
+            >
+              <option value="">Semua rating</option>
+              {[5, 4, 3, 2, 1].map((r) => (
+                <option key={r} value={r}>{r} bintang</option>
+              ))}
+            </Select>
+            <Select
+              value={sort}
+              onChange={(e) => { setPage(1); setSort(e.target.value); }}
+            >
+              <option value="created_at:desc">Terbaru</option>
+              <option value="created_at:asc">Terlama</option>
+              <option value="rating:desc">Rating tertinggi</option>
+              <option value="rating:asc">Rating terendah</option>
+            </Select>
+          </div>
+
           <Table>
             <THead>
               <TR>

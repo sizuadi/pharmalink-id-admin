@@ -3,10 +3,12 @@ import { api, buildQuery, type Paginated, type Single, type ApiError } from "@/l
 import type { Pharmacy, PharmacyDetail } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Modal, DetailRow, Field } from "@/components/ui/modal";
 import { ActiveBadge } from "@/components/StatusBadge";
+import { Avatar } from "@/components/Avatar";
 import { formatRupiah } from "@/lib/utils";
 
 export function Pharmacies() {
@@ -15,6 +17,8 @@ export function Pharmacies() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sort, setSort] = useState("created_at:desc");
   const [busyId, setBusyId] = useState<number | null>(null);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [editPharmacy, setEditPharmacy] = useState<Pharmacy | null>(null);
@@ -22,15 +26,24 @@ export function Pharmacies() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      // Pharmacy repo sorts by sortName=field, sortBy=direction.
+      const [sortName, sortBy] = sort.split(":");
       const res = await api.get<Paginated<Pharmacy>>(
-        `/admin/pharmacies${buildQuery({ page, perPage: 10, search })}`
+        `/admin/pharmacies${buildQuery({
+          page,
+          perPage: 10,
+          search,
+          status_id: statusFilter,
+          sortName,
+          sortBy,
+        })}`
       );
       setRows(res.data ?? []);
       setTotalPages(res.meta?.totalPages ?? 1);
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, statusFilter, sort]);
 
   useEffect(() => {
     load();
@@ -39,7 +52,8 @@ export function Pharmacies() {
   async function toggleStatus(p: Pharmacy) {
     setBusyId(p.id);
     try {
-      const nextStatus = p.status_id === 1 ? 0 : 1;
+      // Status IDs mirror prisma/seeds/status.seed.ts: 1 = Active, 2 = Inactive.
+      const nextStatus = p.status_id === 1 ? 2 : 1;
       await api.patch(`/admin/pharmacies/${p.id}/status`, { status_id: nextStatus });
       await load();
     } catch (err) {
@@ -58,7 +72,7 @@ export function Pharmacies() {
 
       <Card>
         <CardContent className="pt-5">
-          <div className="mb-4">
+          <div className="mb-4 flex flex-wrap gap-2">
             <Input
               placeholder="Cari apotek…"
               value={search}
@@ -68,11 +82,29 @@ export function Pharmacies() {
               }}
               className="max-w-xs"
             />
+            <Select
+              value={statusFilter}
+              onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
+            >
+              <option value="">Semua status</option>
+              <option value="1">Aktif</option>
+              <option value="2">Nonaktif</option>
+            </Select>
+            <Select
+              value={sort}
+              onChange={(e) => { setPage(1); setSort(e.target.value); }}
+            >
+              <option value="created_at:desc">Terbaru</option>
+              <option value="created_at:asc">Terlama</option>
+              <option value="name:asc">Nama A–Z</option>
+              <option value="name:desc">Nama Z–A</option>
+            </Select>
           </div>
 
           <Table>
             <THead>
               <TR>
+                <TH>Logo</TH>
                 <TH>Name</TH>
                 <TH>Phone</TH>
                 <TH>Address</TH>
@@ -83,12 +115,13 @@ export function Pharmacies() {
             </THead>
             <TBody>
               {loading ? (
-                <TR><TD className="text-muted-foreground" colSpan={6}>Loading…</TD></TR>
+                <TR><TD className="text-muted-foreground" colSpan={7}>Loading…</TD></TR>
               ) : rows.length === 0 ? (
-                <TR><TD className="text-muted-foreground" colSpan={6}>Tidak ada apotek.</TD></TR>
+                <TR><TD className="text-muted-foreground" colSpan={7}>Tidak ada apotek.</TD></TR>
               ) : (
                 rows.map((p) => (
                   <TR key={p.id}>
+                    <TD><Avatar name={p.name} pictureUrl={p.picture_url} /></TD>
                     <TD className="font-medium">{p.name || "-"}</TD>
                     <TD className="text-muted-foreground">{p.phone_number || "-"}</TD>
                     <TD className="max-w-[220px] truncate text-muted-foreground">{p.address || "-"}</TD>

@@ -9,6 +9,7 @@ import {
   Star,
   FileText,
   ShieldCheck,
+  Bell,
   Settings as SettingsIcon,
   LogOut,
   Moon,
@@ -27,6 +28,7 @@ const navItems = [
   { to: "/reviews", label: "Reviews", icon: Star, end: false },
   { to: "/prescriptions", label: "Prescriptions", icon: FileText, end: false },
   { to: "/admins", label: "Admins", icon: ShieldCheck, end: false },
+  { to: "/notifications", label: "Notifications", icon: Bell, end: false },
   { to: "/settings", label: "Settings", icon: SettingsIcon, end: false },
 ];
 

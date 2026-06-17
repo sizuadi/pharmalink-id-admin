@@ -6,6 +6,28 @@
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001/api/v1";
 
+/**
+ * Origin that serves uploaded files (backend `/uploads`). Files live at the
+ * server root, NOT under `/api/v1`, so derive it from the API base by stripping
+ * the trailing `/api/vN`. Override with VITE_ASSET_BASE_URL if needed.
+ */
+export const ASSET_BASE_URL =
+  import.meta.env.VITE_ASSET_BASE_URL ??
+  BASE_URL.replace(/\/api(\/v\d+)?\/?$/, "");
+
+/**
+ * Turns a backend-relative asset path (e.g. "/uploads/users/x.jpg") into an
+ * absolute URL. Returns absolute URLs unchanged, and undefined for empty paths
+ * so callers can fall back to a placeholder.
+ */
+export function assetUrl(path?: string | null): string | undefined {
+  if (!path) return undefined;
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = ASSET_BASE_URL.replace(/\/$/, "");
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalized}`;
+}
+
 export interface ApiError {
   status: number;
   message: string;

@@ -3,6 +3,7 @@ import { api, buildQuery, type Paginated, type Single, type ApiError } from "@/l
 import type { Transaction } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Modal, DetailRow } from "@/components/ui/modal";
@@ -17,21 +18,32 @@ export function Transactions() {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   const [statusId, setStatusId] = useState<string>("");
+  const [sort, setSort] = useState("transaction_date:desc");
   const [busyId, setBusyId] = useState<number | null>(null);
   const [detailId, setDetailId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      // Transaction repo sorts by sortBy=field, sortName=direction (note: the
+      // opposite convention from the user/pharmacy repos).
+      const [field, dir] = sort.split(":");
       const res = await api.get<Paginated<Transaction>>(
-        `/admin/transactions${buildQuery({ page, perPage: 10, search, status_id: statusId })}`
+        `/admin/transactions${buildQuery({
+          page,
+          perPage: 10,
+          search,
+          status_id: statusId,
+          sortBy: field,
+          sortName: dir,
+        })}`
       );
       setRows(res.data ?? []);
       setTotalPages(res.meta?.totalPages ?? 1);
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusId]);
+  }, [page, search, statusId, sort]);
 
   useEffect(() => {
     load();
@@ -83,6 +95,15 @@ export function Transactions() {
                 </option>
               ))}
             </select>
+            <Select
+              value={sort}
+              onChange={(e) => { setPage(1); setSort(e.target.value); }}
+            >
+              <option value="transaction_date:desc">Terbaru</option>
+              <option value="transaction_date:asc">Terlama</option>
+              <option value="grand_total:desc">Nominal terbesar</option>
+              <option value="grand_total:asc">Nominal terkecil</option>
+            </Select>
           </div>
 
           <Table>

@@ -3,10 +3,12 @@ import { api, buildQuery, type Paginated, type Single, type ApiError } from "@/l
 import type { AdminUser } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { Modal, DetailRow, Field } from "@/components/ui/modal";
 import { ActiveBadge } from "@/components/StatusBadge";
+import { Avatar } from "@/components/Avatar";
 import { formatDate } from "@/lib/utils";
 
 interface UsersPageProps {
@@ -21,6 +23,8 @@ export function UsersPage({ roleId, title, subtitle }: UsersPageProps) {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [sort, setSort] = useState("created_at:desc");
   const [busyId, setBusyId] = useState<number | null>(null);
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
   const [editUser, setEditUser] = useState<AdminUser | null>(null);
@@ -28,15 +32,25 @@ export function UsersPage({ roleId, title, subtitle }: UsersPageProps) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
+      // User repo sorts by sortName=field, sortBy=direction.
+      const [sortName, sortBy] = sort.split(":");
       const res = await api.get<Paginated<AdminUser>>(
-        `/admin/users${buildQuery({ page, perPage: 10, search, role_id: roleId })}`
+        `/admin/users${buildQuery({
+          page,
+          perPage: 10,
+          search,
+          role_id: roleId,
+          status_id: statusFilter,
+          sortName,
+          sortBy,
+        })}`
       );
       setRows(res.data ?? []);
       setTotalPages(res.meta?.totalPages ?? 1);
     } finally {
       setLoading(false);
     }
-  }, [page, search, roleId]);
+  }, [page, search, roleId, statusFilter, sort]);
 
   useEffect(() => {
     setPage(1);
@@ -49,7 +63,8 @@ export function UsersPage({ roleId, title, subtitle }: UsersPageProps) {
   async function toggleStatus(u: AdminUser) {
     setBusyId(u.id);
     try {
-      const nextStatus = u.status_id === 1 ? 0 : 1;
+      // Status IDs mirror prisma/seeds/status.seed.ts: 1 = Active, 2 = Inactive.
+      const nextStatus = u.status_id === 1 ? 2 : 1;
       await api.patch(`/admin/users/${u.id}/status`, { status_id: nextStatus });
       await load();
     } catch (err) {
@@ -68,7 +83,7 @@ export function UsersPage({ roleId, title, subtitle }: UsersPageProps) {
 
       <Card>
         <CardContent className="pt-5">
-          <div className="mb-4">
+          <div className="mb-4 flex flex-wrap gap-2">
             <Input
               placeholder="Cari nama / email…"
               value={search}
@@ -78,11 +93,29 @@ export function UsersPage({ roleId, title, subtitle }: UsersPageProps) {
               }}
               className="max-w-xs"
             />
+            <Select
+              value={statusFilter}
+              onChange={(e) => { setPage(1); setStatusFilter(e.target.value); }}
+            >
+              <option value="">Semua status</option>
+              <option value="1">Aktif</option>
+              <option value="2">Nonaktif</option>
+            </Select>
+            <Select
+              value={sort}
+              onChange={(e) => { setPage(1); setSort(e.target.value); }}
+            >
+              <option value="created_at:desc">Terbaru</option>
+              <option value="created_at:asc">Terlama</option>
+              <option value="full_name:asc">Nama A–Z</option>
+              <option value="full_name:desc">Nama Z–A</option>
+            </Select>
           </div>
 
           <Table>
             <THead>
               <TR>
+                <TH>Foto</TH>
                 <TH>Name</TH>
                 <TH>Email</TH>
                 <TH>Phone</TH>
@@ -93,12 +126,13 @@ export function UsersPage({ roleId, title, subtitle }: UsersPageProps) {
             </THead>
             <TBody>
               {loading ? (
-                <TR><TD className="text-muted-foreground" colSpan={6}>Loading…</TD></TR>
+                <TR><TD className="text-muted-foreground" colSpan={7}>Loading…</TD></TR>
               ) : rows.length === 0 ? (
-                <TR><TD className="text-muted-foreground" colSpan={6}>Tidak ada data.</TD></TR>
+                <TR><TD className="text-muted-foreground" colSpan={7}>Tidak ada data.</TD></TR>
               ) : (
                 rows.map((u) => (
                   <TR key={u.id}>
+                    <TD><Avatar name={u.full_name} pictureUrl={u.picture_url} /></TD>
                     <TD className="font-medium">{u.full_name || "-"}</TD>
                     <TD className="text-muted-foreground">{u.email}</TD>
                     <TD className="text-muted-foreground">{u.phone_number || "-"}</TD>
@@ -179,6 +213,14 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
       {loading || !user ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : (
+        <>
+        <div className="mb-4 flex items-center gap-3">
+          <Avatar name={user.full_name} pictureUrl={user.picture_url} size={64} />
+          <div>
+            <p className="font-medium">{user.full_name || "-"}</p>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
+          </div>
+        </div>
         <dl className="divide-y divide-border">
           <DetailRow label="ID">{user.id}</DetailRow>
           <DetailRow label="Nama">{user.full_name || "-"}</DetailRow>
@@ -204,6 +246,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
           </DetailRow>
           <DetailRow label="Dibuat">{formatDate(user.created_at)}</DetailRow>
         </dl>
+        </>
       )}
     </Modal>
   );
@@ -289,7 +332,7 @@ function UserEditModal({
             className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
           >
             <option value="1">Aktif</option>
-            <option value="0">Nonaktif</option>
+            <option value="2">Nonaktif</option>
           </select>
         </Field>
         <Field label="Password baru (opsional)">
